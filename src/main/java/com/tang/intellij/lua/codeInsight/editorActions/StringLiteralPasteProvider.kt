@@ -45,6 +45,8 @@ class StringLiteralPasteProvider : PasteProvider {
             value = value.replace("\'", "\\\'")
         } else if (quotes == "\"") {
             value = value.replace("\"", "\\\"")
+        } else if (quotes == "`") {
+            value = value.replace("`", "\\`")
         }
 
         WriteCommandAction.runWriteCommandAction(editor.project) {

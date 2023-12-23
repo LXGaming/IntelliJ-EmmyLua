@@ -63,6 +63,7 @@ DOC_DASHES = --+
 //Strings
 DOUBLE_QUOTED_STRING=\"([^\\\"]|\\\S|\\[\r\n])*\"?  //\"([^\\\"\r\n]|\\[^\r\n])*\"?
 SINGLE_QUOTED_STRING='([^\\\']|\\\S|\\[\r\n])*'?    //'([^\\'\r\n]|\\[^\r\n])*'?
+BACKTICK_QUOTED_STRING=`([^\\\`]|\\\S|\\[\r\n])*`?    //`([^\\`\r\n]|\\[^\r\n])*`?
 
 %state xTAG
 %state xTAG_WITH_ID
@@ -79,6 +80,7 @@ SINGLE_QUOTED_STRING='([^\\\']|\\\S|\\[\r\n])*'?    //'([^\\'\r\n]|\\[^\r\n])*'?
 %state xSUPPRESS
 %state xDOUBLE_QUOTED_STRING
 %state xSINGLE_QUOTED_STRING
+%state xBACKTICK_QUOTED_STRING
 
 %%
 
@@ -170,6 +172,7 @@ SINGLE_QUOTED_STRING='([^\\\']|\\\S|\\[\r\n])*'?    //'([^\\'\r\n]|\\[^\r\n])*'?
     "}"                        { _typeLevel--; _typeReq = false; return RCURLY; }
     "\""                       { pushState(xDOUBLE_QUOTED_STRING); yypushback(yylength()); }
     "'"                        { pushState(xSINGLE_QUOTED_STRING); yypushback(yylength()); }
+    "`"                        { pushState(xBACKTICK_QUOTED_STRING); yypushback(yylength()); }
     "[]"                       { _typeReq = false; return ARR; }
     "fun"                      { return FUN; }
     "vararg"                   { _typeReq = true; return VARARG; }
@@ -184,6 +187,10 @@ SINGLE_QUOTED_STRING='([^\\\']|\\\S|\\[\r\n])*'?    //'([^\\'\r\n]|\\[^\r\n])*'?
     {SINGLE_QUOTED_STRING}    { popState(); return STRING_LITERAL; }
 }
 
+<xBACKTICK_QUOTED_STRING> {
+    {BACKTICK_QUOTED_STRING}    { popState(); return STRING_LITERAL; }
+}
+
 <xTAG> {
     "@"                        { yybegin(xCOMMENT_STRING); return STRING_BEGIN; }
     "#"                        { return SHARP; }
@@ -193,6 +200,7 @@ SINGLE_QUOTED_STRING='([^\\\']|\\\S|\\[\r\n])*'?    //'([^\\'\r\n]|\\[^\r\n])*'?
 <xTAG_WITH_ID> {
     "\""                       { pushState(xDOUBLE_QUOTED_STRING); yypushback(yylength()); }
     "'"                        { pushState(xSINGLE_QUOTED_STRING); yypushback(yylength()); }
+    "`"                        { pushState(xBACKTICK_QUOTED_STRING); yypushback(yylength()); }
     {ID}                       { yybegin(xCOMMENT_STRING); return ID; }
 }
 

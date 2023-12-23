@@ -37,7 +37,7 @@ class LuaLanguageInjector : LanguageInjector {
                     val lanDef = PsiTreeUtil.findChildOfType(comment, LuaDocTagLan::class.java)
                     if (lanDef != null) {
                         var lanId = lanDef.id?.text ?: return
-                        if (lanId.startsWith("\"") || lanId.startsWith("'"))
+                        if (lanId.startsWith("\"") || lanId.startsWith("'") || lanId.startsWith("`"))
                             lanId = lanId.substring(1, lanId.length - 1)
                         if (lanId.isEmpty()) return
 
